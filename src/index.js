@@ -21,6 +21,7 @@ const fetchData = async (searchTerm) => {
   return data.Search;
 }
 
+//dropdown widget
 const root = document.querySelector('.autocomplete');
 root.innerHTML = `
   <label> <b>Search For a Movie </b></label>
@@ -31,8 +32,6 @@ root.innerHTML = `
     </div>
   </div>
 `;  
-
-
 const input = document.querySelector('input');
 const dropdown = document.querySelector('.dropdown');
 const resultsWrapper = document.querySelector('.results');
@@ -51,6 +50,11 @@ const renderMovies = (movies) => {
     <img src= "${imgSrc}" />
     ${Title} 
   `;
+  optionAnchor.addEventListener('click', event => {
+      dropdown.classList.remove('is-active');
+      input.value = Title;
+    });
+
     resultsWrapper.appendChild(optionAnchor);
   }
 }
@@ -60,6 +64,10 @@ const onInput = async (event) => {
   const searchTerm = event.target.value;
   const movies = await fetchData(searchTerm);
 
+  if (!movies.length) {
+    dropdown.classList.remove('is-active'); 
+    return
+  }
   resultsWrapper.innerHTML = "";
   
   renderMovies(movies)
@@ -70,7 +78,7 @@ input.addEventListener('input', debounce(onInput, 500));
 document.addEventListener('click', event => {
   const clickedElement = event.target;
   const isTarget = root.contains(clickedElement);
-  console.log(isTarget)
+
   if (!isTarget) dropdown.classList.remove('is-active');
-  else dropdown.classList.add('is-active')
+  // else dropdown.classList.add('is-active')
 });
