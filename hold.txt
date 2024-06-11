@@ -1,0 +1,1 @@
+https://github.com/Microsoft/TypeScript/wiki/FAQ#why-does---outdir-moves-output-after-adding-a-new-file
