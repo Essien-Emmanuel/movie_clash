@@ -9,7 +9,14 @@ const fetchData = async (searchTerm) => {
   });
   
   const data = response.data
-  if (!data.Response) return null;
+  // const h2 = document.createElement('h2');
+  if (data.Error) {
+    // h2.innerText = "No Movie Found.";
+    // document.querySelector("#target").appendChild(h2)
+    return []
+  };
+  // h2.innerText = "";
+  // document.querySelector('#target').appendChild(h2);
 
   return data.Search;
 }
