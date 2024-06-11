@@ -1,3 +1,4 @@
+
 const fetchData = async (searchTerm) => {
   const response = await axios.get("http://www.omdbapi.com/", {
     params: {
@@ -6,20 +7,33 @@ const fetchData = async (searchTerm) => {
 
     } 
   });
-  console.log(response.data);
+  
+  const data = response.data
+  if (!data.Response) return null;
+
+  return data.Search;
 }
 
 const input = document.querySelector('input');
 
-let timeoutId;
-const onInput = (event) => {
-  if (timeoutId) {
-    clearTimeout(timeoutId);
+const renderMovies = (movies) => {
+  for (const movie of movies) {
+    const { Poster, Title, Type, Year, imdbID} = movie;
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <img src= "${Poster}" />
+      <h1> ${Title} </h1>
+    `;
+
+    document.querySelector('#target').appendChild(div);
   }
-  timeoutId = setTimeout(() => {
-    const searchTerm = event.target.value;
-    fetchData(searchTerm);
-  }, 1000);
 }
 
-input.addEventListener('input', onInput);
+let timeoutId;
+const onInput = async (event) => {
+    const searchTerm = event.target.value;
+    const movies = await fetchData(searchTerm);
+    renderMovies(movies);
+}
+
+input.addEventListener('input', debounce(onInput, 500));
