@@ -1,6 +1,6 @@
-const createAutocomplete = ({ root }) => {
+const createAutocomplete = ({ root, renderOption, onOptionSelect, inputValue, fetchData }) => {
   root.innerHTML = `
-    <label> <b>Search For a Movie </b></label>
+    <label> <b>Search</b></label>
     <input class="input" />
     <div class="dropdown">
       <div class="dropdown-menu">
@@ -13,46 +13,43 @@ const createAutocomplete = ({ root }) => {
   const resultsWrapper = root.querySelector('.results');
 
 
-  const renderMovies = (movies) => {
+  const renderItems = (items, renderOption, onOptionSelect, inputValue) => {
     dropdown.classList.add('is-active');
-    for (const movie of movies) {
-      const { Poster, Title} = movie;
+    for (const item of items) {
       const optionAnchor = document.createElement('a');
         
       optionAnchor.classList.add('dropdown-item');
-      const imgSrc = Poster !== "N/A" ? Poster: "";
 
-      optionAnchor.innerHTML = `
-      <img src= "${imgSrc}" />
-      ${Title} 
-    `;
+      optionAnchor.innerHTML = renderOption(item)
     optionAnchor.addEventListener('click', event => {
         dropdown.classList.remove('is-active');
-        input.value = Title;
-        onMovieSelect(movie);
+        input.value = inputValue(item);
+        onOptionSelect(item)
       });
 
       resultsWrapper.appendChild(optionAnchor);
     }
   }
 
-  let timeoutId;
-  const onInput = async (event) => {
-    const searchTerm = event.target.value;
-    const moviesResult = await fetchData('s', searchTerm);
-
-    if (!moviesResult.Response) {
-      dropdown.classList.remove('is-active'); 
-      return
+  const onInput = (fetchData) => {
+    return async (event) => {
+      const searchTerm = event.target.value;
+      const itemsResult = await fetchData('s', searchTerm);
+  
+      if (!itemsResult.Response) {
+        dropdown.classList.remove('is-active'); 
+        return
+      }
+  
+      const items = itemsResult.Search
+      resultsWrapper.innerHTML = "";
+        
+      renderItems(items, renderOption, onOptionSelect, inputValue)
     }
 
-    const movies = moviesResult.Search
-    resultsWrapper.innerHTML = "";
-      
-    renderMovies(movies)
   }
 
-  input.addEventListener('input', debounce(onInput, 500));
+  input.addEventListener('input', debounce(onInput(fetchData), 500));
 
   document.addEventListener('click', event => {
     const clickedElement = event.target;

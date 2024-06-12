@@ -1,39 +1,56 @@
-
-const fetchData = async (param = 's', searchTerm) => {
-  const params = {
-    apikey: "3957e820",
-  } 
-  params[param] = searchTerm;
-
-  const response = await axios.get("http://www.omdbapi.com/", {
-    params
-  });
-  const data = response.data
-  // const h2 = document.createElement('h2');
-  if (data.Error) {
-    // h2.innerText = "No Movie Found.";
-    // document.querySelector("#target").appendChild(h2)
-    return []
-  };
-  // h2.innerText = "";
-  // document.querySelector('#target').appendChild(h2);
-
-  return data;
-}
-
 createAutocomplete({
-  root: document.querySelector('.autocomplete')
-})
+  root: document.querySelector('.autocomplete'),
+  renderOption(movie) {
+    const imgSrc = movie.Poster !== "N/A" ? movie.Poster: "";
+    return `
+    <img src= "${imgSrc}" />
+    ${movie.Title} (${movie.Year})
+  `;
+  },
+  onOptionSelect(movie) {
+    onMovieSelect(movie)
+  },
+  inputValue(movie) {
+    return movie.Title;
+  },
+  
+  async fetchData(param = 's', searchTerm)  {
+    const response = await axios.get("http://www.omdbapi.com/", {
+      params: {
+        apikey: "3957e820",
+        s: searchTerm
+      }
+    });
+    const data = response.data;
+    if (data.Error) {
+      return []
+    };
+    return data;
+  }
+});
 
 const onMovieSelect = async (movie) => {
-  const movieDetail = await fetchData('i', movie.imdbID);
+  const movieDetail = async (movie) => {
+    const response = await axios.get("http://www.omdbapi.com/", {
+      params: {
+        apikey: "3957e820",
+        i: movie.imdbID
+      }
+    });
+    const data = response.data;
+    if (data.Error) {
+      return []
+    };
+    return data;
+  }
+  
   
   const summaryDiv = document.querySelector('#summary');
-  summaryDiv.innerHTML = movieTemplate(movieDetail)
+  summaryDiv.innerHTML = movieTemplate(await movieDetail(movie))
 }
 
 const movieTemplate = (movieDetail) => {
-  const { Poster, Title, Genre, Plot, Awards, BoxOffice, Metascore, imdbRating, imdbVotes } = movieDetail;
+  const { Poster, Title, Genre, Plot, Awards, BoxOffice, Metascore, imdbRating, imdbVotes, } = movieDetail;
   return `
    <article class="media">
     <figure class="media-left">
