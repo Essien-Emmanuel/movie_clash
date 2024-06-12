@@ -1,5 +1,4 @@
-createAutocomplete({
-  root: document.querySelector('.autocomplete'),
+const autocompleteConfig = {
   renderOption(movie) {
     const imgSrc = movie.Poster !== "N/A" ? movie.Poster: "";
     return `
@@ -8,7 +7,8 @@ createAutocomplete({
   `;
   },
   onOptionSelect(movie) {
-    onMovieSelect(movie)
+    document.querySelector('.tutorial').classList.add('is-hidden');
+    onMovieSelect(movie);
   },
   inputValue(movie) {
     return movie.Title;
@@ -27,6 +27,16 @@ createAutocomplete({
     };
     return data;
   }
+}
+
+createAutocomplete({
+  ...autocompleteConfig,
+  root: document.querySelector('#left-autocomplete'),
+});
+
+createAutocomplete({
+  ...autocompleteConfig,
+  root: document.querySelector('#right-autocomplete'),
 });
 
 const onMovieSelect = async (movie) => {
