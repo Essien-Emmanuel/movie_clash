@@ -1,13 +1,13 @@
 
-const fetchData = async (searchTerm) => {
-  const response = await axios.get("http://www.omdbapi.com/", {
-    params: {
-      apikey: "3957e820",
-      s: searchTerm
+const fetchData = async (param = 's', searchTerm) => {
+  const params = {
+    apikey: "3957e820",
+  } 
+  params[param] = searchTerm;
 
-    } 
+  const response = await axios.get("http://www.omdbapi.com/", {
+    params
   });
-  
   const data = response.data
   // const h2 = document.createElement('h2');
   if (data.Error) {
@@ -18,7 +18,7 @@ const fetchData = async (searchTerm) => {
   // h2.innerText = "";
   // document.querySelector('#target').appendChild(h2);
 
-  return data.Search;
+  return data;
 }
 
 //dropdown widget
@@ -53,6 +53,7 @@ const renderMovies = (movies) => {
   optionAnchor.addEventListener('click', event => {
       dropdown.classList.remove('is-active');
       input.value = Title;
+      onMovieSelect(movie);
     });
 
     resultsWrapper.appendChild(optionAnchor);
@@ -62,14 +63,16 @@ const renderMovies = (movies) => {
 let timeoutId;
 const onInput = async (event) => {
   const searchTerm = event.target.value;
-  const movies = await fetchData(searchTerm);
+  const moviesResult = await fetchData('s', searchTerm);
 
-  if (!movies.length) {
+  if (!moviesResult.Response) {
     dropdown.classList.remove('is-active'); 
     return
   }
+
+  const movies = moviesResult.Search
   resultsWrapper.innerHTML = "";
-  
+    
   renderMovies(movies)
 }
 
@@ -80,5 +83,32 @@ document.addEventListener('click', event => {
   const isTarget = root.contains(clickedElement);
 
   if (!isTarget) dropdown.classList.remove('is-active');
-  // else dropdown.classList.add('is-active')
 });
+
+const onMovieSelect = async (movie) => {
+  const movieDetail = await fetchData('i', movie.imdbID);
+  
+  const summaryDiv = document.querySelector('#summary');
+  summaryDiv.innerHTML = movieTemplate(movieDetail)
+}
+
+const movieTemplate = (movieDetail) => {
+  const { Poster, Title, Genre, Plot } = movieDetail;
+  return `
+   <article class="media">
+    <figure class="media-left">
+      <p class="image">
+        <img src=${Poster}" />
+      </p>
+    </figure>
+    <div class="media-content">
+      <div class="content">
+        <h1> ${Title} </h1>
+        <h4> ${Genre} </h4>
+        <p> ${Plot} </p>
+      </div>
+    </div>
+   </article>
+  `
+}
+
