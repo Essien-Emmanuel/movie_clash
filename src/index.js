@@ -21,69 +21,9 @@ const fetchData = async (param = 's', searchTerm) => {
   return data;
 }
 
-//dropdown widget
-const root = document.querySelector('.autocomplete');
-root.innerHTML = `
-  <label> <b>Search For a Movie </b></label>
-  <input class="input" />
-  <div class="dropdown">
-    <div class="dropdown-menu">
-      <div class="dropdown-content results"></div>
-    </div>
-  </div>
-`;  
-const input = document.querySelector('input');
-const dropdown = document.querySelector('.dropdown');
-const resultsWrapper = document.querySelector('.results');
-
-
-const renderMovies = (movies) => {
-  dropdown.classList.add('is-active');
-  for (const movie of movies) {
-    const { Poster, Title} = movie;
-    const optionAnchor = document.createElement('a');
-       
-    optionAnchor.classList.add('dropdown-item');
-    const imgSrc = Poster !== "N/A" ? Poster: "";
-
-    optionAnchor.innerHTML = `
-    <img src= "${imgSrc}" />
-    ${Title} 
-  `;
-  optionAnchor.addEventListener('click', event => {
-      dropdown.classList.remove('is-active');
-      input.value = Title;
-      onMovieSelect(movie);
-    });
-
-    resultsWrapper.appendChild(optionAnchor);
-  }
-}
-
-let timeoutId;
-const onInput = async (event) => {
-  const searchTerm = event.target.value;
-  const moviesResult = await fetchData('s', searchTerm);
-
-  if (!moviesResult.Response) {
-    dropdown.classList.remove('is-active'); 
-    return
-  }
-
-  const movies = moviesResult.Search
-  resultsWrapper.innerHTML = "";
-    
-  renderMovies(movies)
-}
-
-input.addEventListener('input', debounce(onInput, 500));
-
-document.addEventListener('click', event => {
-  const clickedElement = event.target;
-  const isTarget = root.contains(clickedElement);
-
-  if (!isTarget) dropdown.classList.remove('is-active');
-});
+createAutocomplete({
+  root: document.querySelector('.autocomplete')
+})
 
 const onMovieSelect = async (movie) => {
   const movieDetail = await fetchData('i', movie.imdbID);
@@ -93,7 +33,7 @@ const onMovieSelect = async (movie) => {
 }
 
 const movieTemplate = (movieDetail) => {
-  const { Poster, Title, Genre, Plot } = movieDetail;
+  const { Poster, Title, Genre, Plot, Awards, BoxOffice, Metascore, imdbRating, imdbVotes } = movieDetail;
   return `
    <article class="media">
     <figure class="media-left">
@@ -103,11 +43,36 @@ const movieTemplate = (movieDetail) => {
     </figure>
     <div class="media-content">
       <div class="content">
-        <h1> ${Title} </h1>
-        <h4> ${Genre} </h4>
-        <p> ${Plot} </p>
+        <h1>${Title}</h1>
+        <h4>${Genre}</h4>
+        <p>${Plot}</p>
       </div>
     </div>
+   </article>
+
+   <article class="notification is-primary">
+    <p class="title">${Awards}</p>
+    <p class="subtitle">Awards</p>
+   </article>
+
+   <article class="notification is-primary">
+    <p class="title">${BoxOffice}</p>
+    <p class="subtitle">Box Office</p>
+   </article>
+
+   <article class="notification is-primary">
+    <p class="title"> ${Metascore} </p>
+    <p class="subtitle">Metascore</p>
+   </article>
+
+   <article class="notification is-primary">
+    <p class="title"> ${imdbRating} </p>
+    <p class="subtitle">IMDB Rating</p>
+   </article>
+
+   <article class="notification is-primary">
+    <p class="title"> ${imdbVotes} </p>
+    <p class="subtitle">IMDB Votes</p>
    </article>
   `
 }
