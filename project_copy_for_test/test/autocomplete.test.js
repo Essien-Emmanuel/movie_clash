@@ -1,3 +1,20 @@
+const waitFor = (selector) => {
+  return new Promise((resolve, reject) => {
+    const interval = setInterval(() => {
+      if (document.querySelector(selector)) {
+        clearTimeout(timeout);
+        clearInterval(interval);
+        resolve();
+      }
+    }, 30);
+
+    const timeout = setTimeout(() => {
+      reject();
+      clearInterval(interval);
+    }, 2000);
+  });
+};
+
 beforeEach(() => {
   document.querySelector("#target").innerHTML = "";
   createAutoComplete({
@@ -24,10 +41,12 @@ it("Dropdown starts closed", () => {
     throw new Error("Expected dropdown to not be active");
 });
 
-it("After searching, dropdown opens again", () => {
+it("After searching, dropdown opens again", async () => {
   const input = document.querySelector("input");
   input.innerText = "Avengers";
   input.dispatchEvent(new Event("input"));
+
+  await waitFor(".dropdown-item");
 
   const dropdown = document.querySelector(".dropdown");
 
