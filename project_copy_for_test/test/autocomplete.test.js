@@ -43,7 +43,7 @@ it("Dropdown starts closed", () => {
 
 it("After searching, dropdown opens again", async () => {
   const input = document.querySelector("input");
-  input.innerText = "Avengers";
+  input.value = "Avengers";
   input.dispatchEvent(new Event("input"));
 
   await waitFor(".dropdown-item");
@@ -52,4 +52,16 @@ it("After searching, dropdown opens again", async () => {
 
   if (dropdown.className === "is-active")
     throw new Error("Expected dropdown to not be active");
+});
+
+it("After searching, displays some results", async () => {
+  const input = document.querySelector("input");
+  input.value = "Avengers";
+  input.dispatchEvent(new Event("input"));
+
+  await waitFor(".dropdown-item");
+
+  const items = document.querySelectorAll(".dropdown-item");
+
+  if (items.length !== 3) throw new Error("Expected 3 items");
 });
